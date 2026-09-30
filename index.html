@@ -152,7 +152,7 @@
     <div class="section">
       <h2>SCHEDULE</h2>
       <div id="schedule-list">
-        <p style="color: var(--text-muted);">まだ投稿がありません。</p>
+        <p style="color: var(--text-muted);">読み込み中...</p>
       </div>
     </div>
 
@@ -160,7 +160,7 @@
     <div class="section">
       <h2>INFORMATION</h2>
       <div id="info-list">
-        <p style="color: var(--text-muted);">まだ投稿がありません。</p>
+        <p style="color: var(--text-muted);">読み込み中...</p>
       </div>
     </div>
 
@@ -170,40 +170,44 @@
   </div>
 
   <script>
-    // 通信処理に頼らず、万が一エラーが起きた場合でも「読み込み中…」で画面がフリーズしない仕様に変更
     window.addEventListener('DOMContentLoaded', async () => {
-      await fetchFiles('content/schedule', 'schedule-list', true);
-      await fetchFiles('content/pages', 'info-list', false);
+      await loadContent('content/schedule', 'schedule-list', true);
+      await loadContent('content/info', 'info-list', false);
+      await loadContent('content/pages', 'info-list', false);
     });
 
-    async function fetchFiles(folder, elementId, isSchedule) {
+    async function loadContent(folderPath, elementId, isSchedule) {
       const container = document.getElementById(elementId);
-      
-      // リポジトリ名の表記ゆれ（potal / portal）の両方に対応したGitHub APIリクエスト
-      const repoNames = ['ensemble-potal', 'ensemble-portal'];
-      let files = null;
 
-      for (const repo of repoNames) {
+      // GitHub APIから直接ファイルリストを取得（正しいリポジトリ名: ensemble-portal）
+      const apiUrls = [
+        `https://api.github.com/repos/ken-web17/ensemble-portal/contents/${folderPath}`,
+        `https://api.github.com/repos/ken-web17/ensemble-potal/contents/${folderPath}`
+      ];
+
+      let files = null;
+      for (const url of apiUrls) {
         try {
-          const res = await fetch(`https://api.github.com/repos/ken-web17/${repo}/contents/${folder}`);
+          const res = await fetch(url);
           if (res.ok) {
             files = await res.json();
             break;
           }
-        } catch (e) {
-          // 通信エラー時は次のリポジトリ名を試行
-        }
+        } catch (e) {}
       }
 
-      // ファイルが取得できない・投稿がない場合は「まだ投稿がありません。」を表示
-      if (!files || !Array.isArray(files) || files.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+      if (!files || !Array.isArray(files)) {
+        if (container.innerHTML.includes('読み込み中...')) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+        }
         return;
       }
 
       const mdFiles = files.filter(f => f.name && f.name.endsWith('.md'));
       if (mdFiles.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+        if (container.innerHTML.includes('読み込み中...')) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+        }
         return;
       }
 
@@ -217,19 +221,25 @@
 
         const validItems = items.filter(i => i !== null);
         if (validItems.length === 0) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          if (container.innerHTML.includes('読み込み中...')) {
+            container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          }
           return;
         }
 
-        container.innerHTML = validItems.map(item => `
+        const htmlContent = validItems.map(item => `
           <div class="item-card">
             <div class="item-title">${escapeHtml(item.title || '無題')}</div>
             ${isSchedule ? `<div class="item-meta">日時: ${escapeHtml(item.date \vert{}\vert{} '')}${item.location ? '| 場所: ' + escapeHtml(item.location) : ''}</div>` : ''}
             ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
           </div>
         `).join('');
+
+        container.innerHTML = htmlContent;
       } catch (e) {
-        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+        if (container.innerHTML.includes('読み込み中...')) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+        }
       }
     }
 
