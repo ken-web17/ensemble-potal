@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MITSUBOSHI PORTAL | 三つ星パティシエ</title>
-  <!-- Google Fonts: Cinzel & Noto Serif JP -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
@@ -72,7 +72,7 @@
       border-radius: 8px;
       padding: 20px;
       margin-bottom: 40px;
-      display: none; /* デフォルト非表示 */
+      display: none;
     }
 
     .admin-panel h3 {
@@ -188,8 +188,8 @@
   <div class="container">
     <header>
       <div class="header-actions">
-        <a href="/admin/" id="tool-btn" class="btn" style="display: none;">🛠️️ ツール</a>
-        <button id="auth-btn" class="btn" onclick="netlifyIdentity.open()">ログイン</button>
+        <a href="/admin/" id="tool-btn" class="btn" style="display: none;">🛠 ツール</a>
+        <button id="auth-btn" class="btn">ログイン</button>
       </div>
       <h1>MITSUBOSHI PORTAL</h1>
       <div class="subtitle">三つ星パティシエ</div>
@@ -237,46 +237,47 @@
   </div>
 
   <script>
-    // Netlify Identity のイベント監視
-    netlifyIdentity.on('init', user => {
-      handleAuth(user);
-    });
-
-    netlifyIdentity.on('login', user => {
-      netlifyIdentity.close();
-      // ログイン完了時にページを自動で再読み込みして状態を反映
-      location.reload();
-    });
-
-    netlifyIdentity.on('logout', () => {
-      location.reload();
-    });
-
-    function handleAuth(user) {
-      const currentUser = user || netlifyIdentity.currentUser();
-
+    // 画面表示更新のメイン処理
+    function updateUI() {
+      const user = netlifyIdentity.currentUser();
       const authBtn = document.getElementById('auth-btn');
       const toolBtn = document.getElementById('tool-btn');
       const quickPost = document.getElementById('quick-post');
 
-      if (currentUser) {
+      if (user) {
         authBtn.innerText = 'ログアウト';
+        authBtn.onclick = () => netlifyIdentity.open();
         toolBtn.style.display = 'inline-block';
         quickPost.style.display = 'block';
       } else {
         authBtn.innerText = 'ログイン';
+        authBtn.onclick = () => netlifyIdentity.open();
         toolBtn.style.display = 'none';
         quickPost.style.display = 'none';
       }
     }
 
-    // 画面読み込み時にも判定を実行
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        const currentUser = netlifyIdentity.currentUser();
-        handleAuth(currentUser);
-      }, 500);
+    // Netlify Identity イベント登録
+    window.addEventListener('load', () => {
+      if (window.netlifyIdentity) {
+        netlifyIdentity.on('init', user => {
+          updateUI();
+        });
 
+        netlifyIdentity.on('login', user => {
+          netlifyIdentity.close();
+          updateUI();
+          location.reload();
+        });
+
+        netlifyIdentity.on('logout', () => {
+          netlifyIdentity.close();
+          updateUI();
+          location.reload();
+        });
+      }
+
+      // データの初回読み込み
       loadContent('content/schedule', 'schedule-list', true);
       loadContent('content/pages', 'info-list', false);
     });
@@ -332,11 +333,15 @@
       const container = document.getElementById(elementId);
       try {
         const res = await fetch(`https://api.github.com/repos/ken-web17/ensemble-potal/contents/${folderPath}`);
-        if (!res.ok) { container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>'; return; }
+        if (!res.ok) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          return;
+        }
         
         const files = await res.json();
         if (!Array.isArray(files) || files.length === 0) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>'; return;
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          return;
         }
 
         const items = await Promise.all(files.map(async (file) => {
@@ -348,7 +353,8 @@
 
         const validItems = items.filter(i => i !== null);
         if (validItems.length === 0) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>'; return;
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          return;
         }
 
         container.innerHTML = validItems.map(item => `
@@ -376,7 +382,9 @@
             result[key] = value;
           }
         });
-      } else { result.body = text.trim(); }
+      } else {
+        result.body = text.trim();
+      }
       return result;
     }
   </script>
