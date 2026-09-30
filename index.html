@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MITSUBOSHI PORTAL | 三つ星パティシエ</title>
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
@@ -173,41 +172,43 @@
 
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
-      await loadSchedule('schedule-list');
-      await loadInfo('info-list');
-    });
+      // 候補となるファイルパスのリスト（直接指定＋エンコード対応）
+      const possiblePaths = [
+        '/content/schedule/2026-09-30-アンサンブル発表会.md',
+        '/content/schedule/2026-09-30-%E3%82%A2%E3%83%B3%E3%82%B5%E3%83%B3%E3%83%96%E3%83%AB%E7%99%BA%E8%A1%A8%E4%BC%9A.md',
+        'content/schedule/2026-09-30-アンサンブル発表会.md'
+      ];
 
-    async function loadSchedule(elementId) {
-      const container = document.getElementById(elementId);
-      
-      // 今回作成されたMarkdownファイルを直接読み込み
-      const path = '/content/schedule/2026-09-30-アンサンブル発表会.md';
+      const container = document.getElementById('schedule-list');
+      let loaded = false;
 
-      try {
-        const res = await fetch(path);
-        if (res.ok) {
-          const text = await res.text();
-          const item = parseFrontmatter(text);
-          container.innerHTML = `
-            <div class="item-card">
-              <div class="item-title">${escapeHtml(item.title || 'アンサンブル発表会')}</div>
-              <div class="item-meta">📅 日時: ${escapeHtml(item.date || '')} ${item.location ? ' | 📍 場所: ' + escapeHtml(item.location) : ''}</div>
-              ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
-            </div>
-          `;
-          return;
+      for (const path of possiblePaths) {
+        try {
+          const res = await fetch(path);
+          if (res.ok) {
+            const text = await res.text();
+            const item = parseFrontmatter(text);
+            container.innerHTML = `
+              <div class="item-card">
+                <div class="item-title">${escapeHtml(item.title || 'アンサンブル発表会')}</div>
+                <div class="item-meta">📅 日時: ${escapeHtml(item.date || '')} ${item.location ? ' | 📍 場所: ' + escapeHtml(item.location) : ''}</div>
+                ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
+              </div>
+            `;
+            loaded = true;
+            break;
+          }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
       }
 
-      container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-    }
+      if (!loaded) {
+        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+      }
 
-    async function loadInfo(elementId) {
-      const container = document.getElementById(elementId);
-      container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-    }
+      document.getElementById('info-list').innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+    });
 
     function parseFrontmatter(text) {
       const result = { title: '', date: '', location: '', body: '' };
