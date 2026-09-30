@@ -1,26 +1,27 @@
 backend:
   name: git-gateway
-  branch: main # または master（GitHubのデフォルトブランチ名）
+  branch: main
 
-media_folder: "images"
-public_folder: "/images"
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
 
 collections:
   - name: "schedule"
-    label: "スケジュール"
+    label: "📅 スケジュール管理"
     folder: "content/schedule"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
-      - {label: "本番名/タイトル", name: "title", widget: "string"}
-      - {label: "日時", name: "date", widget: "string"}
-      - {label: "場所", name: "location", widget: "string"}
-      - {label: "詳細・メモ", name: "body", widget: "markdown", required: false}
+      - { label: "タイトル（例：全体練習）", name: "title", widget: "string" }
+      - { label: "日時（例：2026/10/15 14:00〜）", name: "date", widget: "string" }
+      - { label: "場所", name: "location", widget: "string", required: false }
+      - { label: "詳細・メモ", name: "body", widget: "markdown", required: false }
 
   - name: "pages"
-    label: "自由ページ・お知らせ"
+    label: "📢 お知らせ・自由ページ"
     folder: "content/pages"
     create: true
+    slug: "{{slug}}"
     fields:
-      - {label: "見出し（タイトル）", name: "title", widget: "string"}
-      - {label: "本文", name: "body", widget: "markdown"}
+      - { label: "タイトル", name: "title", widget: "string" }
+      - { label: "本文", name: "body", widget: "markdown" }
