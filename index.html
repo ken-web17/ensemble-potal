@@ -112,6 +112,7 @@
     .item-content {
       font-size: 0.95rem;
       color: var(--text-color);
+      white-space: pre-wrap;
     }
 
     /* フッター */
@@ -139,7 +140,7 @@
   <div class="container">
     <header>
       <h1>MITSUBOSHI PORTAL</h1>
-      <p class="subtitle">Ensemble Team Portal</p>
+      <p class="subtitle">三つ星パティシエ</p>
     </header>
 
     <main>
@@ -165,5 +166,97 @@
     </footer>
   </div>
 
+  <!-- データ取得・表示用JavaScript -->
+  <script>
+    // GitHub API経由でコンテンツを取得する関数
+    async function loadContent(folderPath, elementId, isSchedule) {
+      const container = document.getElementById(elementId);
+      try {
+        const repoUrl = 'https://api.github.com/repos/ken-web17/ensemble-potal/contents/' + folderPath;
+        const res = await fetch(repoUrl);
+        
+        if (!res.ok) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          return;
+        }
+
+        const files = await res.json();
+        if (!Array.isArray(files) || files.length === 0) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          return;
+        }
+
+        // Markdownファイルを読み込む
+        const items = await Promise.all(files.map(async (file) => {
+          if (!file.name.endsWith('.md')) return null;
+          const fileRes = await fetch(file.download_url);
+          const text = await fileRes.text();
+          return parseFrontmatter(text);
+        }));
+
+        const validItems = items.filter(item => item !== null);
+
+        if (validItems.length === 0) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          return;
+        }
+
+        // HTML生成
+        container.innerHTML = validItems.map(item => {
+          if (isSchedule) {
+            const dateStr = item.date ? item.date.replace('T', ' ') : '';
+            const locationStr = item.location ? ` | 場所: ${item.location}` : '';
+            return `
+              <div class="item-card">
+                <div class="item-title">${item.title || '無題'}</div>
+                <div class="item-meta">日時: ${dateStr}${locationStr}</div>
+                ${item.body ? `<div class="item-content">${item.body}</div>` : ''}
+              </div>
+            `;
+          } else {
+            return `
+              <div class="item-card">
+                <div class="item-title">${item.title || '無題'}</div>
+                ${item.body ? `<div class="item-content">${item.body}</div>` : ''}
+              </div>
+            `;
+          }
+        }).join('');
+
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<p style="color: var(--text-muted);">データの取得に失敗しました。</p>';
+      }
+    }
+
+    // 簡易 Frontmatter（--- で囲まれた設定データ）解析
+    function parseFrontmatter(text) {
+      const result = { title: '', date: '', location: '', body: '' };
+      const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+      
+      if (match) {
+        const yamlStr = match[1];
+        result.body = match[2].trim();
+        
+        yamlStr.split('\n').forEach(line => {
+          const parts = line.split(':');
+          if (parts.length >= 2) {
+            const key = parts[0].trim();
+            const value = parts.slice(1).join(':').trim().replace(/^["']|["']$/g, '');
+            result[key] = value;
+          }
+        });
+      } else {
+        result.body = text.trim();
+      }
+      return result;
+    }
+
+    // ページ読み込み時に実行
+    document.addEventListener('DOMContentLoaded', () => {
+      loadContent('content/schedule', 'schedule-list', true);
+      loadContent('content/pages', 'info-list', false);
+    });
+  </script>
 </body>
 </html>
