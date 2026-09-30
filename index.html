@@ -173,42 +173,38 @@
 
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
-      // 1. 直接ファイルを読み込んで確実にテスト表示
-      await loadDirect('schedule-list', true);
-      await loadDirectInfo('info-list');
+      await loadSchedule('schedule-list');
+      await loadInfo('info-list');
     });
 
-    async function loadDirect(elementId, isSchedule) {
+    async function loadSchedule(elementId) {
       const container = document.getElementById(elementId);
       
-      // GitHubから直接コミットされたファイルを読み込むための相対パスリスト
-      const targetPaths = [
-        '/content/schedule/2026-09-30-アンサンブル発表会.md',
-        'content/schedule/2026-09-30-アンサンブル発表会.md'
-      ];
+      // 今回作成されたMarkdownファイルを直接読み込み
+      const path = '/content/schedule/2026-09-30-アンサンブル発表会.md';
 
-      for (const path of targetPaths) {
-        try {
-          const res = await fetch(path);
-          if (res.ok) {
-            const text = await res.text();
-            const item = parseFrontmatter(text);
-            container.innerHTML = `
-              <div class="item-card">
-                <div class="item-title">${escapeHtml(item.title || 'アンサンブル発表会')}</div>
-                <div class="item-meta">📅 日時: ${escapeHtml(item.date || '')} ${item.location ? ' | 📍 場所: ' + escapeHtml(item.location) : ''}</div>
-                ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
-              </div>
-            `;
-            return;
-          }
-        } catch (e) {}
+      try {
+        const res = await fetch(path);
+        if (res.ok) {
+          const text = await res.text();
+          const item = parseFrontmatter(text);
+          container.innerHTML = `
+            <div class="item-card">
+              <div class="item-title">${escapeHtml(item.title || 'アンサンブル発表会')}</div>
+              <div class="item-meta">📅 日時: ${escapeHtml(item.date || '')} ${item.location ? ' | 📍 場所: ' + escapeHtml(item.location) : ''}</div>
+              ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
+            </div>
+          `;
+          return;
+        }
+      } catch (e) {
+        console.error(e);
       }
 
       container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
     }
 
-    async function loadDirectInfo(elementId) {
+    async function loadInfo(elementId) {
       const container = document.getElementById(elementId);
       container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
     }
