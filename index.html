@@ -14,7 +14,6 @@
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
   <style>
-    /* グローバルスタイル・ダークモード基礎設定 */
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e1e;
@@ -25,31 +24,50 @@
       --accent-gold-hover: #e5c178;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg-color);
       color: var(--text-color);
-      font-family: 'Noto Serif JP', '游明朝', 'Yu Mincho', 'Georgia', serif;
+      font-family: 'Noto Serif JP', '游明朝', 'Yu Mincho', serif;
       line-height: 1.8;
-      padding: 40px 20px;
+      padding: 20px 15px 60px;
     }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
+    .container { max-width: 800px; margin: 0 auto; }
+
+    /* ヘッダー・ログインバー */
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
-    /* ヘッダー・タイトル部分 */
+    .btn-login, .btn-tool {
+      background: transparent;
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .btn-login:hover, .btn-tool:hover {
+      background: var(--accent-gold);
+      color: #121212;
+    }
+
     header {
       text-align: center;
-      padding-bottom: 40px;
+      padding-bottom: 30px;
       border-bottom: 1px solid var(--border-color);
-      margin-bottom: 40px;
+      margin-bottom: 30px;
     }
 
     h1 {
@@ -57,13 +75,52 @@
       font-weight: 300;
       letter-spacing: 0.15em;
       color: var(--accent-gold);
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
-    .subtitle {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
+    .subtitle { font-size: 0.9rem; color: var(--text-muted); letter-spacing: 0.1em; }
+
+    /* 初心者用：クイック投稿エリア */
+    .quick-post-section {
+      background: #181818;
+      border: 1px solid var(--accent-gold);
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 30px;
+      display: none; /* ログイン時のみ表示 */
+    }
+
+    .quick-post-section h3 {
+      color: var(--accent-gold);
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      font-weight: 400;
+    }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      background: #252525;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-family: inherit;
+      border-radius: 4px;
+    }
+    .form-control:focus { border-color: var(--accent-gold); outline: none; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent-gold);
+      color: #121212;
+      border: none;
+      font-family: inherit;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
     }
 
     /* セクションデザイン */
@@ -71,7 +128,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 4px;
-      padding: 30px;
+      padding: 25px;
       margin-bottom: 30px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
@@ -83,110 +140,152 @@
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
       margin-bottom: 20px;
-      letter-spacing: 0.05em;
     }
 
-    /* カード・リストのスタイル */
-    .item-card {
-      padding: 15px 0;
-      border-bottom: 1px dashed var(--border-color);
-    }
+    .item-card { padding: 15px 0; border-bottom: 1px dashed var(--border-color); }
+    .item-card:last-child { border-bottom: none; }
+    .item-title { font-size: 1.1rem; font-weight: 600; color: #ffffff; margin-bottom: 5px; }
+    .item-meta { font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 8px; }
+    .item-content { font-size: 0.95rem; color: var(--text-color); white-space: pre-wrap; }
 
-    .item-card:last-child {
-      border-bottom: none;
-    }
-
-    .item-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 5px;
-    }
-
-    .item-meta {
-      font-size: 0.85rem;
-      color: var(--accent-gold);
-      margin-bottom: 8px;
-    }
-
-    .item-content {
-      font-size: 0.95rem;
-      color: var(--text-color);
-      white-space: pre-wrap;
-    }
-
-    /* フッター */
-    footer {
-      text-align: center;
-      margin-top: 60px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-    }
-
-    footer a {
-      color: var(--accent-gold);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    footer a:hover {
-      color: var(--accent-gold-hover);
-    }
+    footer { text-align: center; margin-top: 40px; font-size: 0.8rem; color: var(--text-muted); }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <!-- ログイン & ツールバー -->
+    <div class="top-bar">
+      <a href="/admin/" class="btn-tool" id="tool-btn" style="display: none;">🛠️ ツール（高度な管理）</a>
+      <button class="btn-login" id="auth-btn" onclick="netlifyIdentity.open()">ログイン</button>
+    </div>
+
     <header>
       <h1>MITSUBOSHI PORTAL</h1>
       <p class="subtitle">三つ星パティシエ</p>
     </header>
 
+    <!-- ログイン時のみ出る「かんたんスケジュール追加」 -->
+    <div class="quick-post-section" id="quick-post">
+      <h3>✍️ かんたんスケジュール追加</h3>
+      <form id="schedule-form">
+        <div class="form-group">
+          <label>タイトル（例：全体練習、アンサンブル本番）</label>
+          <input type="text" id="post-title" class="form-control" placeholder="件名を入力" required>
+        </div>
+        <div class="form-group">
+          <label>日時（例：2026/10/15 14:00〜）</label>
+          <input type="text" id="post-date" class="form-control" placeholder="日時を入力" required>
+        </div>
+        <div class="form-group">
+          <label>場所（例：〇〇公民館 音楽室）</label>
+          <input type="text" id="post-location" class="form-control" placeholder="場所を入力">
+        </div>
+        <div class="form-group">
+          <label>メモ・持ち物</label>
+          <textarea id="post-body" class="form-control" rows="3" placeholder="詳細があれば入力"></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="submit-btn">投稿する</button>
+      </form>
+    </div>
+
     <main>
-      <!-- スケジュールセクション -->
       <section>
         <h2>SCHEDULE</h2>
-        <div id="schedule-list">
-          <p style="color: var(--text-muted);">読み込み中...</p>
-        </div>
+        <div id="schedule-list"><p style="color: var(--text-muted);">読み込み中...</p></div>
       </section>
 
-      <!-- お知らせ・自由ページセクション -->
       <section>
         <h2>INFORMATION</h2>
-        <div id="info-list">
-          <p style="color: var(--text-muted);">読み込み中...</p>
-        </div>
+        <div id="info-list"><p style="color: var(--text-muted);">読み込み中...</p></div>
       </section>
     </main>
 
     <footer>
-      <p>&copy; MITSUBOSHI PORTAL | <a href="/admin/">管理画面へ</a></p>
+      <p>&copy; MITSUBOSHI PORTAL</p>
     </footer>
   </div>
 
-  <!-- データ取得・表示用JavaScript -->
   <script>
-    // GitHub API経由でコンテンツを取得する関数
+    // ログイン状態の判定
+    netlifyIdentity.on('init', user => handleAuth(user));
+    netlifyIdentity.on('login', user => { handleAuth(user); netlifyIdentity.close(); });
+    netlifyIdentity.on('logout', () => handleAuth(null));
+
+    function handleAuth(user) {
+      const authBtn = document.getElementById('auth-btn');
+      const toolBtn = document.getElementById('tool-btn');
+      const quickPost = document.getElementById('quick-post');
+
+      if (user) {
+        authBtn.innerText = 'ログアウト';
+        toolBtn.style.display = 'inline-block';
+        quickPost.style.display = 'block';
+      } else {
+        authBtn.innerText = 'メンバーログイン';
+        toolBtn.style.display = 'none';
+        quickPost.style.display = 'none';
+      }
+    }
+
+    // 簡易投稿（GitHub API経由で直接保存）
+    document.getElementById('schedule-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = netlifyIdentity.currentUser();
+      if (!user) return alert('ログインが必要です');
+
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.innerText = '送信中...';
+      submitBtn.disabled = true;
+
+      const title = document.getElementById('post-title').value;
+      const date = document.getElementById('post-date').value;
+      const location = document.getElementById('post-location').value;
+      const body = document.getElementById('post-body').value;
+
+      const filename = `${new Date().toISOString().split('T')[0]}-${Date.now()}.md`;
+      const content = `---\ntitle: "${title}"\ndate: "${date}"\nlocation: "${location}"\n---\n${body}`;
+
+      try {
+        const token = user.token.access_token;
+        const res = await fetch(`https://api.github.com/repos/ken-web17/ensemble-potal/contents/content/schedule/${filename}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Add schedule: ${title}`,
+            content: btoa(unescape(encodeURIComponent(content)))
+          })
+        });
+
+        if (res.ok) {
+          alert('スケジュールを追加しました！');
+          location.reload();
+        } else {
+          alert('投稿に失敗しました。管理画面から試してください。');
+        }
+      } catch (err) {
+        alert('エラーが発生しました');
+      } finally {
+        submitBtn.innerText = '投稿する';
+        submitBtn.disabled = false;
+      }
+    });
+
+    // データ読み込み機能
     async function loadContent(folderPath, elementId, isSchedule) {
       const container = document.getElementById(elementId);
       try {
-        const repoUrl = 'https://api.github.com/repos/ken-web17/ensemble-potal/contents/' + folderPath;
-        const res = await fetch(repoUrl);
+        const res = await fetch(`https://api.github.com/repos/ken-web17/ensemble-potal/contents/${folderPath}`);
+        if (!res.ok) { container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>'; return; }
         
-        if (!res.ok) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-          return;
-        }
-
         const files = await res.json();
         if (!Array.isArray(files) || files.length === 0) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-          return;
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>'; return;
         }
 
-        // Markdownファイルを読み込む
         const items = await Promise.all(files.map(async (file) => {
           if (!file.name.endsWith('.md')) return null;
           const fileRes = await fetch(file.download_url);
@@ -194,51 +293,29 @@
           return parseFrontmatter(text);
         }));
 
-        const validItems = items.filter(item => item !== null);
-
+        const validItems = items.filter(i => i !== null);
         if (validItems.length === 0) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-          return;
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>'; return;
         }
 
-        // HTML生成
-        container.innerHTML = validItems.map(item => {
-          if (isSchedule) {
-            const dateStr = item.date ? item.date.replace('T', ' ') : '';
-            const locationStr = item.location ? ` | 場所: ${item.location}` : '';
-            return `
-              <div class="item-card">
-                <div class="item-title">${item.title || '無題'}</div>
-                <div class="item-meta">日時: ${dateStr}${locationStr}</div>
-                ${item.body ? `<div class="item-content">${item.body}</div>` : ''}
-              </div>
-            `;
-          } else {
-            return `
-              <div class="item-card">
-                <div class="item-title">${item.title || '無題'}</div>
-                ${item.body ? `<div class="item-content">${item.body}</div>` : ''}
-              </div>
-            `;
-          }
-        }).join('');
-
+        container.innerHTML = validItems.map(item => `
+          <div class="item-card">
+            <div class="item-title">${item.title || '無題'}</div>
+            ${isSchedule ? `<div class="item-meta">日時: ${item.date \vert{}\vert{} ''}${item.location ? '| 場所: ' + item.location : ''}</div>` : ''}
+            ${item.body ? `<div class="item-content">${item.body}</div>` : ''}
+          </div>
+        `).join('');
       } catch (err) {
-        console.error(err);
         container.innerHTML = '<p style="color: var(--text-muted);">データの取得に失敗しました。</p>';
       }
     }
 
-    // 簡易 Frontmatter（--- で囲まれた設定データ）解析
     function parseFrontmatter(text) {
       const result = { title: '', date: '', location: '', body: '' };
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-      
       if (match) {
-        const yamlStr = match[1];
         result.body = match[2].trim();
-        
-        yamlStr.split('\n').forEach(line => {
+        match[1].split('\n').forEach(line => {
           const parts = line.split(':');
           if (parts.length >= 2) {
             const key = parts[0].trim();
@@ -246,13 +323,10 @@
             result[key] = value;
           }
         });
-      } else {
-        result.body = text.trim();
-      }
+      } else { result.body = text.trim(); }
       return result;
     }
 
-    // ページ読み込み時に実行
     document.addEventListener('DOMContentLoaded', () => {
       loadContent('content/schedule', 'schedule-list', true);
       loadContent('content/pages', 'info-list', false);
