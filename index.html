@@ -61,7 +61,6 @@
       margin-top: 5px;
     }
 
-    /* Section & Cards */
     .section {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -105,7 +104,6 @@
       white-space: pre-wrap;
     }
 
-    /* Buttons */
     .btn {
       background: transparent;
       border: 1px solid var(--gold);
@@ -153,13 +151,17 @@
     <!-- SCHEDULE SECTION -->
     <div class="section">
       <h2>SCHEDULE</h2>
-      <div id="schedule-list">読み込み中...</div>
+      <div id="schedule-list">
+        <p style="color: var(--text-muted);">まだ投稿がありません。</p>
+      </div>
     </div>
 
     <!-- INFORMATION SECTION -->
     <div class="section">
       <h2>INFORMATION</h2>
-      <div id="info-list">読み込み中...</div>
+      <div id="info-list">
+        <p style="color: var(--text-muted);">まだ投稿がありません。</p>
+      </div>
     </div>
 
     <footer>
@@ -168,48 +170,49 @@
   </div>
 
   <script>
-    // 画面読み込み時にデータ取得を実行
-    window.addEventListener('DOMContentLoaded', () => {
-      loadContent('content/schedule', 'schedule-list', true);
-      loadContent('content/pages', 'info-list', false);
+    // 通信処理に頼らず、万が一エラーが起きた場合でも「読み込み中…」で画面がフリーズしない仕様に変更
+    window.addEventListener('DOMContentLoaded', async () => {
+      await fetchFiles('content/schedule', 'schedule-list', true);
+      await fetchFiles('content/pages', 'info-list', false);
     });
 
-    async function loadContent(folderPath, elementId, isSchedule) {
+    async function fetchFiles(folder, elementId, isSchedule) {
       const container = document.getElementById(elementId);
       
-      try {
-        // GitHub APIでフォルダ内のファイル一覧を取得
-        const res = await fetch(`https://api.github.com/repos/ken-web17/ensemble-potal/contents/${folderPath}`);
-        
-        // フォルダが存在しない・エラーの場合は「投稿なし」にして終了
-        if (!res.ok) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-          return;
-        }
+      // リポジトリ名の表記ゆれ（potal / portal）の両方に対応したGitHub APIリクエスト
+      const repoNames = ['ensemble-potal', 'ensemble-portal'];
+      let files = null;
 
-        const files = await res.json();
-        if (!Array.isArray(files) || files.length === 0) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-          return;
-        }
-
-        // .md ファイルだけを取り出す
-        const mdFiles = files.filter(f => f.name && f.name.endsWith('.md'));
-        if (mdFiles.length === 0) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-          return;
-        }
-
-        // 各ファイルの中身を取得して読み込む
-        const items = await Promise.all(mdFiles.map(async (file) => {
-          try {
-            const fileRes = await fetch(file.download_url);
-            if (!fileRes.ok) return null;
-            const text = await fileRes.text();
-            return parseFrontmatter(text);
-          } catch (e) {
-            return null;
+      for (const repo of repoNames) {
+        try {
+          const res = await fetch(`https://api.github.com/repos/ken-web17/${repo}/contents/${folder}`);
+          if (res.ok) {
+            files = await res.json();
+            break;
           }
+        } catch (e) {
+          // 通信エラー時は次のリポジトリ名を試行
+        }
+      }
+
+      // ファイルが取得できない・投稿がない場合は「まだ投稿がありません。」を表示
+      if (!files || !Array.isArray(files) || files.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+        return;
+      }
+
+      const mdFiles = files.filter(f => f.name && f.name.endsWith('.md'));
+      if (mdFiles.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+        return;
+      }
+
+      try {
+        const items = await Promise.all(mdFiles.map(async (file) => {
+          const fileRes = await fetch(file.download_url);
+          if (!fileRes.ok) return null;
+          const text = await fileRes.text();
+          return parseFrontmatter(text);
         }));
 
         const validItems = items.filter(i => i !== null);
@@ -218,7 +221,6 @@
           return;
         }
 
-        // 画面にカード形式で表示
         container.innerHTML = validItems.map(item => `
           <div class="item-card">
             <div class="item-title">${escapeHtml(item.title || '無題')}</div>
@@ -226,14 +228,11 @@
             ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
           </div>
         `).join('');
-
-      } catch (err) {
-        // 万が一通信エラーが起きても「読み込み中...」で止めずに「投稿なし」にする
+      } catch (e) {
         container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
       }
     }
 
-    // Markdownの解析処理（タイトルの情報などを分解）
     function parseFrontmatter(text) {
       const result = { title: '', date: '', location: '', body: '' };
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
