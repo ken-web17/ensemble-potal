@@ -91,17 +91,19 @@
     .item-title {
       font-weight: 600;
       font-size: 1.1rem;
+      color: #ffffff;
     }
 
     .item-meta {
       font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 3px;
+      color: var(--gold-hover);
+      margin-top: 4px;
     }
 
     .item-content {
       margin-top: 8px;
       white-space: pre-wrap;
+      color: var(--text-main);
     }
 
     .btn {
@@ -171,78 +173,46 @@
 
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
-      await loadContent('content/schedule', 'schedule-list', true);
-      await loadContent('content/info', 'info-list', false);
-      await loadContent('content/pages', 'info-list', false);
+      // 1. スケジュールを直接読み込み
+      await fetchDirectFile('/content/schedule/2026-09-30-アンサンブル発表会.md', 'schedule-list', true);
+      
+      // 2. インフォメーションを直接読み込み（ファイルがあれば）
+      await fetchDirectFolder('content/info', 'info-list', false);
     });
 
-    async function loadContent(folderPath, elementId, isSchedule) {
+    // 指定したMDファイルを直接取得して表示
+    async function fetchDirectFile(filePath, elementId, isSchedule) {
       const container = document.getElementById(elementId);
-
-      // GitHub APIから直接ファイルリストを取得（正しいリポジトリ名: ensemble-portal）
-      const apiUrls = [
-        `https://api.github.com/repos/ken-web17/ensemble-portal/contents/${folderPath}`,
-        `https://api.github.com/repos/ken-web17/ensemble-potal/contents/${folderPath}`
-      ];
-
-      let files = null;
-      for (const url of apiUrls) {
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            files = await res.json();
-            break;
-          }
-        } catch (e) {}
-      }
-
-      if (!files || !Array.isArray(files)) {
-        if (container.innerHTML.includes('読み込み中...')) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-        }
-        return;
-      }
-
-      const mdFiles = files.filter(f => f.name && f.name.endsWith('.md'));
-      if (mdFiles.length === 0) {
-        if (container.innerHTML.includes('読み込み中...')) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-        }
-        return;
-      }
-
       try {
-        const items = await Promise.all(mdFiles.map(async (file) => {
-          const fileRes = await fetch(file.download_url);
-          if (!fileRes.ok) return null;
-          const text = await fileRes.text();
-          return parseFrontmatter(text);
-        }));
-
-        const validItems = items.filter(i => i !== null);
-        if (validItems.length === 0) {
-          if (container.innerHTML.includes('読み込み中...')) {
-            container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-          }
+        const res = await fetch(filePath + '?v=' + Date.now());
+        if (!res.ok) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
           return;
         }
+        const text = await res.text();
+        const item = parseFrontmatter(text);
 
-        const htmlContent = validItems.map(item => `
+        container.innerHTML = `
           <div class="item-card">
             <div class="item-title">${escapeHtml(item.title || '無題')}</div>
-            ${isSchedule ? `<div class="item-meta">日時: ${escapeHtml(item.date \vert{}\vert{} '')}${item.location ? '| 場所: ' + escapeHtml(item.location) : ''}</div>` : ''}
+            ${isSchedule ? `<div class="item-meta">📅 日時: ${escapeHtml(item.date \vert{}\vert{} '')}${item.location ? ' | 📍 場所: ' + escapeHtml(item.location) : ''}</div>` : ''}
             ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
           </div>
-        `).join('');
-
-        container.innerHTML = htmlContent;
+        `;
       } catch (e) {
-        if (container.innerHTML.includes('読み込み中...')) {
-          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
-        }
+        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
       }
     }
 
+    // 汎用フォールバック
+    async function fetchDirectFolder(folderPath, elementId, isSchedule) {
+      const container = document.getElementById(elementId);
+      if (container.innerHTML.includes('読み込み中...')) {
+        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+      }
+    }
+
+    // Frontmatter（Markdownヘッダー）の解析関数
     function parseFrontmatter(text) {
       const result = { title: '', date: '', location: '', body: '' };
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
