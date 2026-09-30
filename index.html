@@ -3,90 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MITSUBOSHI PORTAL</title>
-  
-  <!-- Google Fonts: 質感のある美しい明朝体 (Noto Serif JP) -->
+  <title>MITSUBOSHI PORTAL | 三つ星パティシエ</title>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
-  
-  <!-- Netlify Identity Widget -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
-    /* グローバルスタイル・ダークモード基礎設定 */
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e1e;
-      --border-color: #2a2a2a;
-      --text-color: #e0e0e0;
+      --text-main: #e0e0e0;
       --text-muted: #a0a0a0;
-      --accent-gold: #c5a059;
-      --accent-gold-hover: #e5c178;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      --gold: #d4af37;
+      --gold-hover: #f3e5ab;
+      --border-color: #333333;
     }
 
     body {
+      margin: 0;
+      padding: 0;
       background-color: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Noto Serif JP', '游明朝', 'Yu Mincho', 'Georgia', serif;
+      color: var(--text-main);
+      font-family: 'Noto Serif JP', serif;
       line-height: 1.8;
-      padding: 40px 20px;
     }
 
     .container {
       max-width: 800px;
       margin: 0 auto;
+      padding: 40px 20px;
     }
 
-    /* ヘッダー・タイトル部分 */
     header {
       text-align: center;
-      padding-bottom: 40px;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 40px;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .header-actions {
+      position: absolute;
+      top: 0;
+      right: 0;
     }
 
     h1 {
-      font-size: 2.2rem;
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      color: var(--accent-gold);
-      margin-bottom: 10px;
+      font-family: 'Cinzel', serif;
+      font-size: 2.5rem;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin: 0;
     }
 
     .subtitle {
       font-size: 0.9rem;
       color: var(--text-muted);
-      letter-spacing: 0.1em;
+      letter-spacing: 0.2em;
+      margin-top: 5px;
     }
 
-    /* セクションデザイン */
-    section {
+    /* Section & Cards */
+    .section {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 4px;
+      border-radius: 8px;
       padding: 30px;
       margin-bottom: 30px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     h2 {
-      font-size: 1.3rem;
-      font-weight: 400;
-      color: var(--accent-gold);
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      color: var(--gold);
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
+      margin-top: 0;
       margin-bottom: 20px;
-      letter-spacing: 0.05em;
     }
 
-    /* カード・リストのスタイル */
     .item-card {
       padding: 15px 0;
       border-bottom: 1px dashed var(--border-color);
@@ -97,41 +90,52 @@
     }
 
     .item-title {
-      font-size: 1.1rem;
       font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 5px;
+      font-size: 1.1rem;
     }
 
     .item-meta {
       font-size: 0.85rem;
-      color: var(--accent-gold);
-      margin-bottom: 8px;
+      color: var(--text-muted);
+      margin-top: 3px;
     }
 
     .item-content {
-      font-size: 0.95rem;
-      color: var(--text-color);
+      margin-top: 8px;
       white-space: pre-wrap;
     }
 
-    /* フッター */
+    /* Buttons */
+    .btn {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 6px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.3s;
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background: var(--gold);
+      color: #000;
+    }
+
     footer {
       text-align: center;
-      margin-top: 60px;
+      margin-top: 50px;
       font-size: 0.8rem;
       color: var(--text-muted);
-      letter-spacing: 0.05em;
+      font-family: 'Cinzel', serif;
     }
 
     footer a {
-      color: var(--accent-gold);
+      color: var(--gold);
       text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    footer a:hover {
-      color: var(--accent-gold-hover);
     }
   </style>
 </head>
@@ -139,106 +143,92 @@
 
   <div class="container">
     <header>
+      <div class="header-actions">
+        <a href="/admin/" class="btn">ログイン / 管理画面</a>
+      </div>
       <h1>MITSUBOSHI PORTAL</h1>
-      <p class="subtitle">三つ星パティシエ</p>
+      <div class="subtitle">Ensemble Team Portal</div>
     </header>
 
-    <main>
-      <!-- スケジュールセクション -->
-      <section>
-        <h2>SCHEDULE</h2>
-        <div id="schedule-list">
-          <p style="color: var(--text-muted);">読み込み中...</p>
-        </div>
-      </section>
+    <!-- SCHEDULE SECTION -->
+    <div class="section">
+      <h2>SCHEDULE</h2>
+      <div id="schedule-list">読み込み中...</div>
+    </div>
 
-      <!-- お知らせ・自由ページセクション -->
-      <section>
-        <h2>INFORMATION</h2>
-        <div id="info-list">
-          <p style="color: var(--text-muted);">読み込み中...</p>
-        </div>
-      </section>
-    </main>
+    <!-- INFORMATION SECTION -->
+    <div class="section">
+      <h2>INFORMATION</h2>
+      <div id="info-list">読み込み中...</div>
+    </div>
 
     <footer>
-      <p>&copy; MITSUBOSHI PORTAL | <a href="/admin/">管理画面へ</a></p>
+      &copy; MITSUBOSHI PORTAL | <a href="/admin/">管理画面へ</a>
     </footer>
   </div>
 
-  <!-- データ取得・表示用JavaScript -->
   <script>
-    // GitHub API経由でコンテンツを取得する関数
+    document.addEventListener('DOMContentLoaded', () => {
+      loadContent('content/schedule', 'schedule-list', true);
+      loadContent('content/pages', 'info-list', false);
+    });
+
     async function loadContent(folderPath, elementId, isSchedule) {
       const container = document.getElementById(elementId);
       try {
-        const repoUrl = 'https://api.github.com/repos/ken-web17/ensemble-potal/contents/' + folderPath;
-        const res = await fetch(repoUrl);
-        
+        const res = await fetch(`https://api.github.com/repos/ken-web17/ensemble-potal/contents/${folderPath}`);
         if (!res.ok) {
           container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
           return;
         }
-
+        
         const files = await res.json();
         if (!Array.isArray(files) || files.length === 0) {
           container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
           return;
         }
 
-        // Markdownファイルを読み込む
-        const items = await Promise.all(files.map(async (file) => {
-          if (!file.name.endsWith('.md')) return null;
-          const fileRes = await fetch(file.download_url);
-          const text = await fileRes.text();
-          return parseFrontmatter(text);
+        const mdFiles = files.filter(f => f.name && f.name.endsWith('.md'));
+        if (mdFiles.length === 0) {
+          container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
+          return;
+        }
+
+        const items = await Promise.all(mdFiles.map(async (file) => {
+          try {
+            const fileRes = await fetch(file.download_url);
+            if (!fileRes.ok) return null;
+            const text = await fileRes.text();
+            return parseFrontmatter(text);
+          } catch (e) {
+            return null;
+          }
         }));
 
-        const validItems = items.filter(item => item !== null);
-
+        const validItems = items.filter(i => i !== null);
         if (validItems.length === 0) {
           container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
           return;
         }
 
-        // HTML生成
-        container.innerHTML = validItems.map(item => {
-          if (isSchedule) {
-            const dateStr = item.date ? item.date.replace('T', ' ') : '';
-            const locationStr = item.location ? ` | 場所: ${item.location}` : '';
-            return `
-              <div class="item-card">
-                <div class="item-title">${item.title || '無題'}</div>
-                <div class="item-meta">日時: ${dateStr}${locationStr}</div>
-                ${item.body ? `<div class="item-content">${item.body}</div>` : ''}
-              </div>
-            `;
-          } else {
-            return `
-              <div class="item-card">
-                <div class="item-title">${item.title || '無題'}</div>
-                ${item.body ? `<div class="item-content">${item.body}</div>` : ''}
-              </div>
-            `;
-          }
-        }).join('');
-
+        container.innerHTML = validItems.map(item => `
+          <div class="item-card">
+            <div class="item-title">${escapeHtml(item.title || '無題')}</div>
+            ${isSchedule ? `<div class="item-meta">日時: ${escapeHtml(item.date \vert{}\vert{} '')}${item.location ? '| 場所: ' + escapeHtml(item.location) : ''}</div>` : ''}
+            ${item.body ? `<div class="item-content">${escapeHtml(item.body)}</div>` : ''}
+          </div>
+        `).join('');
       } catch (err) {
-        console.error(err);
-        container.innerHTML = '<p style="color: var(--text-muted);">データの取得に失敗しました。</p>';
+        container.innerHTML = '<p style="color: var(--text-muted);">まだ投稿がありません。</p>';
       }
     }
 
-    // 簡易 Frontmatter（--- で囲まれた設定データ）解析
     function parseFrontmatter(text) {
       const result = { title: '', date: '', location: '', body: '' };
       const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-      
       if (match) {
-        const yamlStr = match[1];
         result.body = match[2].trim();
-        
-        yamlStr.split('\n').forEach(line => {
+        match[1].split('\n').forEach(line => {
           const parts = line.split(':');
           if (parts.length >= 2) {
             const key = parts[0].trim();
@@ -252,11 +242,15 @@
       return result;
     }
 
-    // ページ読み込み時に実行
-    document.addEventListener('DOMContentLoaded', () => {
-      loadContent('content/schedule', 'schedule-list', true);
-      loadContent('content/pages', 'info-list', false);
-    });
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
   </script>
 </body>
 </html>
