@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
-  <!-- Netlify Identity Widget -->
-  <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <style>
     :root {
       --bg-color: #121212;
@@ -46,8 +44,6 @@
       position: absolute;
       top: 0;
       right: 0;
-      display: flex;
-      gap: 10px;
     }
 
     h1 {
@@ -63,44 +59,6 @@
       color: var(--text-muted);
       letter-spacing: 0.2em;
       margin-top: 5px;
-    }
-
-    /* Admin Action Section */
-    .admin-panel {
-      background: #252525;
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 40px;
-      display: none;
-    }
-
-    .admin-panel h3 {
-      margin-top: 0;
-      color: var(--gold);
-      font-size: 1.1rem;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 5px;
-    }
-
-    .form-group input, .form-group textarea {
-      width: 100%;
-      padding: 8px;
-      background: #121212;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-family: inherit;
     }
 
     /* Section & Cards */
@@ -167,13 +125,6 @@
       color: #000;
     }
 
-    .btn-submit {
-      background: var(--gold);
-      color: #000;
-      font-weight: bold;
-      width: 100%;
-    }
-
     footer {
       text-align: center;
       margin-top: 50px;
@@ -188,36 +139,11 @@
   <div class="container">
     <header>
       <div class="header-actions">
-        <a href="/admin/" id="tool-btn" class="btn" style="display: none;">🛠 ツール</a>
-        <button id="auth-btn" class="btn">ログイン</button>
+        <a href="/admin/" class="btn">ログイン / 管理画面</a>
       </div>
       <h1>MITSUBOSHI PORTAL</h1>
       <div class="subtitle">三つ星パティシエ</div>
     </header>
-
-    <!-- ログイン時のみ表示される簡易投稿フォーム -->
-    <div id="quick-post" class="admin-panel">
-      <h3>✍️ かんたんスケジュール追加</h3>
-      <form id="schedule-form">
-        <div class="form-group">
-          <label>タイトル</label>
-          <input type="text" id="post-title" required placeholder="例：定期ライブ">
-        </div>
-        <div class="form-group">
-          <label>日時</label>
-          <input type="text" id="post-date" required placeholder="例：2026/04/01 19:00〜">
-        </div>
-        <div class="form-group">
-          <label>場所</label>
-          <input type="text" id="post-location" placeholder="例：秋葉原ライブハウス">
-        </div>
-        <div class="form-group">
-          <label>詳細・メモ</label>
-          <textarea id="post-body" rows="3" placeholder="詳細テキスト（任意）"></textarea>
-        </div>
-        <button type="submit" class="btn btn-submit" id="submit-btn">投稿する</button>
-      </form>
-    </div>
 
     <!-- SCHEDULE SECTION -->
     <div class="section">
@@ -237,98 +163,11 @@
   </div>
 
   <script>
-    // 画面表示更新のメイン処理
-    function updateUI() {
-      const user = netlifyIdentity.currentUser();
-      const authBtn = document.getElementById('auth-btn');
-      const toolBtn = document.getElementById('tool-btn');
-      const quickPost = document.getElementById('quick-post');
-
-      if (user) {
-        authBtn.innerText = 'ログアウト';
-        authBtn.onclick = () => netlifyIdentity.open();
-        toolBtn.style.display = 'inline-block';
-        quickPost.style.display = 'block';
-      } else {
-        authBtn.innerText = 'ログイン';
-        authBtn.onclick = () => netlifyIdentity.open();
-        toolBtn.style.display = 'none';
-        quickPost.style.display = 'none';
-      }
-    }
-
-    // Netlify Identity イベント登録
-    window.addEventListener('load', () => {
-      if (window.netlifyIdentity) {
-        netlifyIdentity.on('init', user => {
-          updateUI();
-        });
-
-        netlifyIdentity.on('login', user => {
-          netlifyIdentity.close();
-          updateUI();
-          location.reload();
-        });
-
-        netlifyIdentity.on('logout', () => {
-          netlifyIdentity.close();
-          updateUI();
-          location.reload();
-        });
-      }
-
-      // データの初回読み込み
+    document.addEventListener('DOMContentLoaded', () => {
       loadContent('content/schedule', 'schedule-list', true);
       loadContent('content/pages', 'info-list', false);
     });
 
-    // 簡易投稿機能
-    document.getElementById('schedule-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const user = netlifyIdentity.currentUser();
-      if (!user) return alert('ログインが必要です');
-
-      const submitBtn = document.getElementById('submit-btn');
-      submitBtn.innerText = '送信中...';
-      submitBtn.disabled = true;
-
-      const title = document.getElementById('post-title').value;
-      const date = document.getElementById('post-date').value;
-      const locationVal = document.getElementById('post-location').value;
-      const body = document.getElementById('post-body').value;
-
-      const filename = `${new Date().toISOString().split('T')[0]}-${Date.now()}.md`;
-      const content = `---\ntitle: "${title}"\ndate: "${date}"\nlocation: "${locationVal}"\n---\n${body}`;
-
-      try {
-        const token = user.token.access_token;
-        const res = await fetch(`https://api.github.com/repos/ken-web17/ensemble-potal/contents/content/schedule/${filename}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Add schedule: ${title}`,
-            content: btoa(unescape(encodeURIComponent(content)))
-          })
-        });
-
-        if (res.ok) {
-          alert('スケジュールを追加しました！');
-          location.reload();
-        } else {
-          alert('投稿に失敗しました。');
-        }
-      } catch (err) {
-        alert('エラーが発生しました');
-      } finally {
-        submitBtn.innerText = '投稿する';
-        submitBtn.disabled = false;
-      }
-    });
-
-    // データ読み込み処理
     async function loadContent(folderPath, elementId, isSchedule) {
       const container = document.getElementById(elementId);
       try {
